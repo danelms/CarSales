@@ -10,10 +10,13 @@ void adminMenu();
 void addStock();
 void removeStock();
 void viewSales();
+void loadFile();
+void saveFile();
 
 #define MAX_LEN 255
+#define ARRAY_SIZE(x) sizeof(x) / sizeof(x[0])
 
-Car *_stock[];
+Car* _stock[10] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 Sale* _sales[];
 
 const char* _adminPassword = "hardPasswordToGuess123!#";
@@ -81,7 +84,20 @@ void adminMenu()
 
 void addStock()
 {
+    char _make[MAX_LEN];
+    char _model[MAX_LEN];
+    readString("Enter car make: ", _make, MAX_LEN);
+    readString("Enter car model: ", _model, MAX_LEN);
+    double _price = readDouble("Enter price: ");
+    int _stock = readInt(("Enter number of %s %ss to be added to stock:", _make, _model));
 
+    Car _newCar;
+    _newCar.setMake(_make);
+    _newCar.setModel(_model);
+    _newCar.setPrice(_price);
+    _newCar.setStock(_stock);
+
+    /////////////UPDATE TO ADD _newCar TO _stock!!!!!!!!!!!!!!!!//////////
 }
 
 void removeStock()
@@ -92,4 +108,16 @@ void removeStock()
 void viewSales()
 {
 
+}
+
+void loadFiles()
+{
+   //READ DATA FROM CSV INTO _stock
+   //READ DATA FROM CSV INTO _sales
+}
+
+void saveFiles()
+{
+    //WRITE DATA FROM _stock INTO CSV
+    //WRITE DATA FROM _sales INTO CSV
 }

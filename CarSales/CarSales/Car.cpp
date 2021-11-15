@@ -1,20 +1,31 @@
 #include <iostream>
 #include <cstring>
 
+#define MAX_LEN 255
+
 class Car
 {
     double _price;
-    char _name[50];
+    char _make[MAX_LEN];
+    char _model[MAX_LEN];
     int _stock, _menuPlace;
 
 public:
-    void setName(const char* _newName)
+    void setMake(const char* _newMake)
     {
-        strcpy_s(_name, _newName);
+        strcpy_s(_make, _newMake);
     }
     char* getName()
     {
-        return _name;
+        return _make;
+    }
+    void setModel(const char* _newModel)
+    {
+        strcpy_s(_model, _newModel);
+    }
+    char* getModel()
+    {
+        return _model;
     }
     void setStock(int _stockSet)
     {
