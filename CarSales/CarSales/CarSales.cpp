@@ -10,8 +10,8 @@ void adminMenu();
 void addStock();
 void removeStock();
 void viewSales();
-void loadFile();
-void saveFile();
+void loadFiles();
+void saveFiles();
 
 #define MAX_LEN 255
 #define ARRAY_SIZE(x) sizeof(x) / sizeof(x[0])
