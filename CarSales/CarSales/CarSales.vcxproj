@@ -80,6 +80,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <SourcePath>../ReadLine;$(SourcePath)</SourcePath>
+    <IncludePath>../ReadLine;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -144,6 +146,7 @@
     <ClCompile Include="..\ReadLine\ReadLine.cpp" />
     <ClCompile Include="Car.cpp" />
     <ClCompile Include="CarSales.cpp" />
+    <ClCompile Include="Sales.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

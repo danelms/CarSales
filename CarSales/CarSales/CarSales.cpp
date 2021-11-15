@@ -2,6 +2,7 @@
 #include <cstring>
 #include "ReadLine.h"
 #include "Car.cpp"
+#include "Sales.cpp"
 void mainMenu();
 void viewCars();
 void buyCars();
@@ -10,7 +11,12 @@ void addStock();
 void removeStock();
 void viewSales();
 
+#define MAX_LEN 255
+
 Car *_stock[];
+Sale* _sales[];
+
+const char* _adminPassword = "hardPasswordToGuess123!#";
 
 int main()
 {
@@ -23,7 +29,7 @@ void mainMenu()
 
     while (!_quit)
     {
-        printf("Main Menu:\n\n1. View Cars in Stock\n2.Purchase a Car\n3.Admin Menu\n4. Quit\n");
+        printf("\nMain Menu:\n\n1. View Cars in Stock\n2. Purchase a Car\n3. Admin Menu\n4. Quit\n\n");
 
         int _selection = readIntInRange("Select an option from the menu: ",1,4);
 
@@ -37,7 +43,7 @@ void mainMenu()
         }
         else if (_selection == 3)
         {
-            printf("\nSelection 3\n");
+            adminMenu();
         }
         else if (_selection == 4)
         {
@@ -60,7 +66,17 @@ void buyCars()
 
 void adminMenu()
 {
+    char _password[MAX_LEN];
+    readString("!Authorised access only!\n\nEnter the administrator password to access this menu: ", _password, MAX_LEN);
 
+    if (strcmp(_password, _adminPassword) == 0)
+    {
+        printf("Admin Menu:\n\n1.Add Stock\n2.Remove Stock\n3.View Sales History\n\n");
+    }
+    else
+    {
+        printf("\n!Access Denied: Incorrect Password!\n");
+    }
 }
 
 void addStock()
@@ -69,6 +85,11 @@ void addStock()
 }
 
 void removeStock()
+{
+
+}
+
+void viewSales()
 {
 
 }
