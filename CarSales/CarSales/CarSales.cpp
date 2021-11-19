@@ -23,6 +23,7 @@ const char* _adminPassword = "hardPasswordToGuess123!#";
 
 int main()
 {
+    //loadFiles()
     mainMenu();
 }
 
@@ -38,7 +39,7 @@ void mainMenu()
 
         if (_selection == 1)
         {
-            printf("\nSelection 1\n");
+            viewCars();
         }
         else if (_selection == 2)
         {
@@ -59,7 +60,19 @@ void mainMenu()
 
 void viewCars()
 {
+    //TEST
+    _stock[0] = new Car;
+    _stock[0]->setMake("Volkswagen");
+    _stock[0]->setModel("Golf");
+    //ENDTEST
 
+    for (Car* _car : _stock)
+    {
+        if (_car != NULL)
+        {
+            printf("%s %s\n", _car->getMake(), _car->getModel());
+        }
+    }
 }
 
 void buyCars()
@@ -74,7 +87,21 @@ void adminMenu()
 
     if (strcmp(_password, _adminPassword) == 0)
     {
-        printf("Admin Menu:\n\n1.Add Stock\n2.Remove Stock\n3.View Sales History\n\n");
+        bool _quit = false;
+
+        while (!_quit)
+        {
+            printf("Admin Menu:\n\n1.Add Stock\n2.Remove Stock\n3.View Sales History\n\n");
+            
+            int _selection = readIntInRange("Select an option from the menu",1,4);
+
+            switch (_selection)
+            {
+            case 1:
+                addStock();
+                break;
+            }
+        }
     }
     else
     {
@@ -107,7 +134,7 @@ void removeStock()
 
 void viewSales()
 {
-
+    
 }
 
 void loadFiles()
@@ -119,5 +146,8 @@ void loadFiles()
 void saveFiles()
 {
     //WRITE DATA FROM _stock INTO CSV
+    FILE* _fp; //File Pointer
+
+    fopen_s(&_fp, "carStock.csv", "w"); //Open file for write
     //WRITE DATA FROM _sales INTO CSV
 }
