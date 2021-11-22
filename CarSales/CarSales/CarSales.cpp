@@ -12,6 +12,7 @@ void removeStock();
 void viewSales();
 void loadFiles();
 void saveFiles();
+void BubbleSortDescStock(Car* _cars[]);
 
 #define MAX_LEN 255
 #define ARRAY_SIZE(x) sizeof(x) / sizeof(x[0])
@@ -26,7 +27,7 @@ int i;
 
 int main()
 {
-    //loadFiles()
+    loadFiles();
     mainMenu();
     saveFiles();
 }
@@ -64,14 +65,16 @@ void mainMenu()
 
 void viewCars()
 {
-    //TEST
-    _stock[0] = new Car;
-    _stock[0]->setMake("Volkswagen");
-    _stock[0]->setModel("Golf");
-    _stock[0]->setMenuPlace(1);
-    _stock[0]->setPrice(18999.99);
-    _stock[0]->setStock(5);
-    //ENDTEST
+    ////TEST
+    //_stock[0] = new Car;
+    //_stock[0]->setMake("Volkswagen");
+    //_stock[0]->setModel("Golf");
+    //_stock[0]->setMenuPlace(1);
+    //_stock[0]->setPrice(18999.99);
+    //_stock[0]->setStock(5);
+    ////ENDTEST
+
+    BubbleSortDescStock(_stock);
 
     printf("\n");
 
@@ -79,7 +82,7 @@ void viewCars()
     {
         if (_car != NULL)
         {
-            printf("%d. %s %s\n",_car->getMenuPlace(), _car->getMake(), _car->getModel());
+            printf("%d. %s %s\t\tIn Stock: %d\n",_car->getMenuPlace(), _car->getMake(), _car->getModel(), _car->getStock());
         }
     }
 }
@@ -149,28 +152,56 @@ void viewSales()
 void loadFiles()
 {
    //READ DATA FROM CSV INTO _stock
+    char _buffer[MAX_LEN];
     char _tempMake[MAX_LEN];
     char _tempModel[MAX_LEN];
-    float _tempPrice;
+    double _tempPrice;
     int _tempStock;
 
-    if ((_fptr = fopen("stock.csv", "r")) == NULL)
+    fopen_s(&_fptr, "stock.csv", "r");
+
+    if (NULL == _fptr)
     {
-        printf("Error opening file \"stock.csv\"");
+        printf("\nAttention! No current file containing stock information found, one will be created upon exit of program.\n");
     }
     else
     {
-        for (i = 0; i < 10; i++)
+        char* _start;
+        char* _end;
+        int _count = 0;
+
+        while (!feof(_fptr))
         {
-            fscanf(_fptr, "%s,%s,%.2lf,%d\n", &_tempMake, &_tempModel, &_tempPrice, &_tempStock);
+            fgets(_buffer, MAX_LEN, _fptr);
+            _start = _buffer;                                   //Point to start of _buffer
+            _end = strchr(_buffer, ',');                        //Point to first comma in _buffer (end of car make)
+            printf("%d", int(_end - _start));
+            strncpy_s(_tempMake, _start, int(_end - _start));     //_tempMake is assigned the string comprised of everything up until _end (first comma)
+            _start = _end + 1;
+            _end += 1;
+            while (*_end != ',')                              //Iterate until next comma
+            {
+                _end++;
+            }
+            printf("%d", int(_end - _start));
+            strncpy_s(_tempModel, _start, int(_end - _start));    //tempModel is assigned the string comprised of everything from _start to _end (1st letter of model to next comma)
+            _start = _end + 1;
+            sscanf_s(_start, "%lf,%d\n", &_tempPrice, &_tempStock); //Remaining two values assigned to _tempPrice & _tempStock
+
             _stock[i] = new Car;
-            
             _stock[i]->setMake(_tempMake);
             _stock[i]->setModel(_tempModel);
             _stock[i]->setPrice(_tempPrice);
             _stock[i]->setStock(_tempStock);
+
+            _count++;
         }
+
+        fclose(_fptr);
     }
+
+   
+
    //READ DATA FROM CSV INTO _sales
 }
 
@@ -192,7 +223,44 @@ void saveFiles()
                 fprintf(_fptr, "%s,%s,%.2lf,%d\n", _car->getMake(), _car->getModel(), _car->getPrice(), _car->getStock());
             }
         }
+        fclose(_fptr);
     }
     
     //WRITE DATA FROM _sales INTO CSV
+}
+
+void BubbleSortDescStock(Car* _cars[])
+{
+    bool _swapped = true;
+    Car* _carTemp;
+
+    while (_swapped)
+    {
+        _swapped = false;
+
+        for (i = 0; i < 10; i++)
+        {
+            if ((_cars[i] != NULL) && (_cars[i + 1] != NULL))
+            {
+                if (_cars[i]->getStock() < _cars[i + 1]->getStock())
+                {
+                    _carTemp = _cars[i];
+                    _cars[i] = _cars[i + 1];
+                    _cars[i + 1] = _carTemp;
+
+                    _swapped = true;
+                }
+            }
+            
+        }
+    }
+
+    for (i = 0; i < 10; i++)
+    {
+        if (_cars[i] != NULL)
+        {
+            _cars[i]->setMenuPlace(i);
+        }
+    }
+
 }
