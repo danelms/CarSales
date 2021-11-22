@@ -16,7 +16,7 @@ void saveFiles();
 #define MAX_LEN 255
 #define ARRAY_SIZE(x) sizeof(x) / sizeof(x[0])
 
-Car* _stock[10] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+Car* _stock[10] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 Sale* _sales[];
 
 const char* _adminPassword = "hardPasswordToGuess123!#";
