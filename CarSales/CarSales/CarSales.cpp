@@ -19,12 +19,16 @@ void saveFiles();
 Car* _stock[10] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 Sale* _sales[];
 
+FILE* _fptr;
+
 const char* _adminPassword = "hardPasswordToGuess123!#";
+int i;
 
 int main()
 {
     //loadFiles()
     mainMenu();
+    saveFiles();
 }
 
 void mainMenu()
@@ -64,13 +68,18 @@ void viewCars()
     _stock[0] = new Car;
     _stock[0]->setMake("Volkswagen");
     _stock[0]->setModel("Golf");
+    _stock[0]->setMenuPlace(1);
+    _stock[0]->setPrice(18999.99);
+    _stock[0]->setStock(5);
     //ENDTEST
+
+    printf("\n");
 
     for (Car* _car : _stock)
     {
         if (_car != NULL)
         {
-            printf("%s %s\n", _car->getMake(), _car->getModel());
+            printf("%d. %s %s\n",_car->getMenuPlace(), _car->getMake(), _car->getModel());
         }
     }
 }
@@ -140,14 +149,50 @@ void viewSales()
 void loadFiles()
 {
    //READ DATA FROM CSV INTO _stock
+    char _tempMake[MAX_LEN];
+    char _tempModel[MAX_LEN];
+    float _tempPrice;
+    int _tempStock;
+
+    if ((_fptr = fopen("stock.csv", "r")) == NULL)
+    {
+        printf("Error opening file \"stock.csv\"");
+    }
+    else
+    {
+        for (i = 0; i < 10; i++)
+        {
+            fscanf(_fptr, "%s,%s,%.2lf,%d\n", &_tempMake, &_tempModel, &_tempPrice, &_tempStock);
+            _stock[i] = new Car;
+            
+            _stock[i]->setMake(_tempMake);
+            _stock[i]->setModel(_tempModel);
+            _stock[i]->setPrice(_tempPrice);
+            _stock[i]->setStock(_tempStock);
+        }
+    }
    //READ DATA FROM CSV INTO _sales
 }
 
 void saveFiles()
 {
     //WRITE DATA FROM _stock INTO CSV
-    FILE* _fp; //File Pointer
+    _fptr = fopen("stock.csv", "w"); //Open "stock.csv" in write (Create new file)
 
-    fopen_s(&_fp, "carStock.csv", "w"); //Open file for write
+    if (_fptr == NULL)
+    {
+        printf("Error creating new file \"stock.csv\"");
+    }
+    else
+    {
+        for (Car* _car : _stock)
+        {
+            if (_car != NULL)
+            {
+                fprintf(_fptr, "%s,%s,%.2lf,%d\n", _car->getMake(), _car->getModel(), _car->getPrice(), _car->getStock());
+            }
+        }
+    }
+    
     //WRITE DATA FROM _sales INTO CSV
 }
