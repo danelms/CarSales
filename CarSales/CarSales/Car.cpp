@@ -15,7 +15,7 @@ public:
     {
         strcpy_s(_make, _newMake);
     }
-    char* getName()
+    char* getMake()
     {
         return _make;
     }
