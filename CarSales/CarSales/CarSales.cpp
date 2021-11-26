@@ -23,7 +23,7 @@ Sale* _sales[];
 FILE* _fptr;
 
 const char* _adminPassword = "hardPasswordToGuess123!#";
-int i;
+int i, _carIndex = 0;
 
 int main()
 {
@@ -65,25 +65,23 @@ void mainMenu()
 
 void viewCars()
 {
-    ////TEST
-    //_stock[0] = new Car;
-    //_stock[0]->setMake("Volkswagen");
-    //_stock[0]->setModel("Golf");
-    //_stock[0]->setMenuPlace(1);
-    //_stock[0]->setPrice(18999.99);
-    //_stock[0]->setStock(5);
-    ////ENDTEST
-
     BubbleSortDescStock(_stock);
 
     printf("\n");
+    bool _inStock = false;
 
     for (Car* _car : _stock)
     {
         if (_car != NULL)
         {
+            _inStock = true;
             printf("%d. %s %s\t\tIn Stock: %d\n",_car->getMenuPlace(), _car->getMake(), _car->getModel(), _car->getStock());
         }
+    }
+
+    if (!_inStock)
+    {
+        printf("No cars currently in stock.\n");
     }
 }
 
@@ -103,15 +101,17 @@ void adminMenu()
 
         while (!_quit)
         {
-            printf("Admin Menu:\n\n1.Add Stock\n2.Remove Stock\n3.View Sales History\n\n");
+            printf("Admin Menu:\n\n1.Add Stock\n2.Remove Stock\n3.View Sales History\n4.Main Menu\n\n");
             
-            int _selection = readIntInRange("Select an option from the menu",1,4);
+            int _selection = readIntInRange("Select an option from the menu: ",1,4);
 
-            switch (_selection)
+            if (_selection == 1)
             {
-            case 1:
-                addStock();
-                break;
+                addStock();   
+            }
+            else if (_selection == 4)
+            {
+                _quit = true;
             }
         }
     }
@@ -128,15 +128,15 @@ void addStock()
     readString("Enter car make: ", _make, MAX_LEN);
     readString("Enter car model: ", _model, MAX_LEN);
     double _price = readDouble("Enter price: ");
-    int _stock = readInt(("Enter number of %s %ss to be added to stock:", _make, _model));
+    int _inStock = readInt(("Enter number of %s %ss to be added to stock:", _make, _model));
 
-    Car _newCar;
-    _newCar.setMake(_make);
-    _newCar.setModel(_model);
-    _newCar.setPrice(_price);
-    _newCar.setStock(_stock);
+    Car* _newCar = NULL;
+    _newCar->setMake(_make);
+    _newCar->setModel(_model);
+    _newCar->setPrice(_price);
+    _newCar->setStock(_inStock);
 
-    /////////////UPDATE TO ADD _newCar TO _stock!!!!!!!!!!!!!!!!//////////
+    _stock[_carIndex] = _newCar;
 }
 
 void removeStock()
@@ -168,33 +168,38 @@ void loadFiles()
     {
         char* _start;
         char* _end;
-        int _count = 0;
+        i = 0;
 
         while (!feof(_fptr))
         {
             fgets(_buffer, MAX_LEN, _fptr);
-            _start = _buffer;                                   //Point to start of _buffer
-            _end = strchr(_buffer, ',');                        //Point to first comma in _buffer (end of car make)
-            printf("%d", int(_end - _start));
-            strncpy_s(_tempMake, _start, int(_end - _start));     //_tempMake is assigned the string comprised of everything up until _end (first comma)
-            _start = _end + 1;
-            _end += 1;
-            while (*_end != ',')                              //Iterate until next comma
+            
+            if (_buffer[0] == '#')      //if line starts with a '#' (has been written to)
             {
-                _end++;
+                printf("\nBUFFER: %s\n", _buffer);
+                _start = _buffer + 1;                                   //Point to start of _buffer
+                _end = strchr(_buffer, ',');                        //Point to first comma in _buffer (end of car make)
+                strncpy_s(_tempMake, _start, int(_end - _start));     //_tempMake is assigned the string comprised of everything up until _end (first comma)
+                _start = _end + 1;
+                _end += 1;
+                while (*_end != ',')                              //Iterate until next comma
+                {
+                    _end++;
+                }
+                strncpy_s(_tempModel, _start, int(_end - _start));    //tempModel is assigned the string comprised of everything from _start to _end (1st letter of model to next comma)
+                _start = _end + 1;
+                sscanf_s(_start, "%lf,%d\n", &_tempPrice, &_tempStock); //Remaining two values assigned to _tempPrice & _tempStock
+
+                _stock[i] = new Car;                    //Create new car object using data from CSV
+                _stock[i]->setMake(_tempMake);
+                _stock[i]->setModel(_tempModel);
+                _stock[i]->setPrice(_tempPrice);
+                _stock[i]->setStock(_tempStock);
+
+                i++;
+                _carIndex++;
             }
-            printf("%d", int(_end - _start));
-            strncpy_s(_tempModel, _start, int(_end - _start));    //tempModel is assigned the string comprised of everything from _start to _end (1st letter of model to next comma)
-            _start = _end + 1;
-            sscanf_s(_start, "%lf,%d\n", &_tempPrice, &_tempStock); //Remaining two values assigned to _tempPrice & _tempStock
-
-            _stock[i] = new Car;
-            _stock[i]->setMake(_tempMake);
-            _stock[i]->setModel(_tempModel);
-            _stock[i]->setPrice(_tempPrice);
-            _stock[i]->setStock(_tempStock);
-
-            _count++;
+            
         }
 
         fclose(_fptr);
@@ -208,7 +213,7 @@ void loadFiles()
 void saveFiles()
 {
     //WRITE DATA FROM _stock INTO CSV
-    _fptr = fopen("stock.csv", "w"); //Open "stock.csv" in write (Create new file)
+    _fptr = fopen("stock.csv", "w"); //Open "stock.csv" in write (Create new file / overwrite file)
 
     if (_fptr == NULL)
     {
@@ -220,9 +225,10 @@ void saveFiles()
         {
             if (_car != NULL)
             {
-                fprintf(_fptr, "%s,%s,%.2lf,%d\n", _car->getMake(), _car->getModel(), _car->getPrice(), _car->getStock());
+                fprintf(_fptr, "#%s,%s,%.2lf,%d\n", _car->getMake(), _car->getModel(), _car->getPrice(), _car->getStock());
             }
         }
+
         fclose(_fptr);
     }
     
@@ -252,15 +258,14 @@ void BubbleSortDescStock(Car* _cars[])
                 }
             }
             
+            if (_cars[i] != NULL)
+            {
+                _cars[i]->setMenuPlace(i + 1);
+            }
+
         }
     }
 
-    for (i = 0; i < 10; i++)
-    {
-        if (_cars[i] != NULL)
-        {
-            _cars[i]->setMenuPlace(i);
-        }
-    }
+ 
 
 }
