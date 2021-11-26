@@ -176,7 +176,7 @@ void loadFiles()
             
             if (_buffer[0] == '#')      //if line starts with a '#' (has been written to)
             {
-                printf("\nBUFFER: %s\n", _buffer);
+                printf("\nBUFFER: %s\n", _buffer);//TROUBLESHOOTER - REMEMBER TO REMOVE !!!!!!!!
                 _start = _buffer + 1;                                   //Point to start of _buffer
                 _end = strchr(_buffer, ',');                        //Point to first comma in _buffer (end of car make)
                 strncpy_s(_tempMake, _start, int(_end - _start));     //_tempMake is assigned the string comprised of everything up until _end (first comma)
