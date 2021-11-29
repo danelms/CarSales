@@ -48,7 +48,7 @@ void mainMenu()
         }
         else if (_selection == 2)
         {
-            printf("\nSelection 2\n");
+            buyCars();
         }
         else if (_selection == 3)
         {
@@ -75,7 +75,7 @@ void viewCars()
         if (_car != NULL)
         {
             _inStock = true;
-            printf("%d. %s %s\t\tIn Stock: %d\n",_car->getMenuPlace(), _car->getMake(), _car->getModel(), _car->getStock());
+            printf("%d. %s %s\t\t\tIn Stock: %d\n",_car->getMenuPlace(), _car->getMake(), _car->getModel(), _car->getStock());
         }
     }
 
@@ -87,7 +87,60 @@ void viewCars()
 
 void buyCars()
 {
+    viewCars();
+    printf("4. Return to Main Menu\n\n");
 
+    int _selection = readIntInRange("Select the car you would like to purchase: ",1,_carIndex + 1);
+    bool _quit = false, _currentSet = false;
+    Car* _currentSelection;
+
+    while (!_quit)
+    {
+        if (_selection == _carIndex + 1)
+        {
+            _quit = true;
+        }
+        else
+        {
+            for (Car* _car : _stock)
+            {
+                if (_selection == _car->getMenuPlace())
+                {
+                    _currentSelection = _car;
+                    _currentSet = true;
+                }
+            }
+
+            if (!_currentSet)
+            {
+                _currentSelection = NULL;
+                printf("\n!Unforseen Error, returning to main menu!\n");
+                _quit = true;
+            }
+
+            int _amount = readInt("How many would you like to purchase?: ");
+            double _offer;
+
+            if (_amount > _currentSelection->getStock())  //ptntially uninit lcl ptr variable _currentSelection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            {
+                printf("\nERROR: Not that many currently in stock.\n");
+            }
+            else if (_amount < 1)
+            {
+                printf("\nERROR: You cannot purchase less than 1 car.\n");
+            }
+            else
+            {
+                _currentSelection->setStock(_currentSelection->getStock() - _amount); //Remove amount desired from current stock
+                _offer = readDouble("Enter the full price* to complete purchase now, or make an offer\n*Price per car: ");
+
+                //CREATE SALES RECORD FULL PRICE (SOLD)
+                //CREATE SALES RECORD OFFER (PENDING)
+            }
+        }
+        
+    }
+    
 }
 
 void adminMenu()
@@ -128,9 +181,9 @@ void addStock()
     readString("Enter car make: ", _make, MAX_LEN);
     readString("Enter car model: ", _model, MAX_LEN);
     double _price = readDouble("Enter price: ");
-    int _inStock = readInt(("Enter number of %s %ss to be added to stock:", _make, _model));
+    int _inStock = readInt("Enter number to add to stock: ");
 
-    Car* _newCar = NULL;
+    Car* _newCar = new Car();
     _newCar->setMake(_make);
     _newCar->setModel(_model);
     _newCar->setPrice(_price);
@@ -202,10 +255,9 @@ void loadFiles()
             
         }
 
-        fclose(_fptr);
     }
 
-   
+    fclose(_fptr);
 
    //READ DATA FROM CSV INTO _sales
 }
@@ -262,10 +314,6 @@ void BubbleSortDescStock(Car* _cars[])
             {
                 _cars[i]->setMenuPlace(i + 1);
             }
-
         }
     }
-
- 
-
 }
