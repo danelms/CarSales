@@ -92,7 +92,7 @@ void buyCars()
 
     int _selection = readIntInRange("Select the car you would like to purchase: ",1,_carIndex + 1);
     bool _quit = false, _currentSet = false;
-    Car* _currentSelection;
+    Car* _currentSelection = NULL;
 
     while (!_quit)
     {
@@ -113,7 +113,6 @@ void buyCars()
 
             if (!_currentSet)
             {
-                _currentSelection = NULL;
                 printf("\n!Unforseen Error, returning to main menu!\n");
                 _quit = true;
             }
@@ -121,7 +120,7 @@ void buyCars()
             int _amount = readInt("How many would you like to purchase?: ");
             double _offer;
 
-            if (_amount > _currentSelection->getStock())  //ptntially uninit lcl ptr variable _currentSelection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if (_amount > _currentSelection->getStock())
             {
                 printf("\nERROR: Not that many currently in stock.\n");
             }
