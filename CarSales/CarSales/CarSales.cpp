@@ -22,7 +22,7 @@ Date getDate();
 SYSTEMTIME _sysDate;
 
 Car* _stock[10] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-Sale* _sales[];
+Sale* _sales[]; //EITHER DECLARE SIZE OR CHANGE TO ARRAY OF SALE STRUCTS, NOT POINTERS
 
 FILE* _fptr;
 
@@ -31,6 +31,9 @@ int i, _carIndex = 0, _salesIndex = 0;
 
 int main()
 {
+    GetLocalTime(&_sysDate); //Fetch current local time for use in Date struct
+    printf("\nToday's date: %02d/%02d/%04d\n", _sysDate.wDay, _sysDate.wMonth, _sysDate.wYear); //Just for testing DELETE
+
     loadFiles();
     mainMenu();
     saveFiles();
@@ -232,34 +235,36 @@ void removeStock()
 
 void viewSales()
 {
-    
+    //FOR (Sale _sale : _sales) LOOP WON'T WORK WITH ARRAY OF UNDECLARED SIZE
 }
 
 void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, char* _newModel, int _newAmount, double _newPrice, double _newOffer, bool _newFinal) //Creates and adds a sale to _sales array
 {
    //OG ATTEMPT
     
-   //Sale* _sale = new Sale;
+   Sale* _sale = new Sale;
 
-   /* _sale->_nameOfCust = _custName;
+    //Store customer info
+    _sale->_nameOfCust = _custName;
     _sale->_ageOfCust = _custAge;
     _sale->_emailAddOfCust = _custEmail;
-
+    //Store car info
     _sale->_make = _newMake;
     _sale->_model = _newModel;
     _sale->_price = _newPrice;
     _sale->_offer = _newOffer;
     _sale->_final = _newFinal;
-    
+    //Store date
     _sale->_dateOfSale = getDate();
     
-    _sales[_salesIndex] = _sale;*/
+    _sales[_salesIndex] = _sale;
+    _salesIndex++;
 
 
     //NEW ATTEMPT
 
-    _sales[_salesIndex]->_nameOfCust = _custName;
-    /*_sales[_salesIndex]->_ageOfCust = _custAge;
+    /*_sales[_salesIndex]->_nameOfCust = _custName;
+    _sales[_salesIndex]->_ageOfCust = _custAge;
     _sales[_salesIndex]->_emailAddOfCust = _custEmail;
     _sales[_salesIndex]->_make = _newMake;
     _sales[_salesIndex]->_model = _newModel;
@@ -314,7 +319,7 @@ void loadFiles()
                 _start = _end + 1;
                 sscanf_s(_start, "%lf,%d\n", &_tempPrice, &_tempStock); //Remaining two values assigned to _tempPrice & _tempStock
 
-                _stock[i] = new Car;                    //Create new car object using data from CSV
+                _stock[i] = new Car;                    //Create new car object using data from CSV line
                 _stock[i]->setMake(_tempMake);
                 _stock[i]->setModel(_tempModel);
                 _stock[i]->setPrice(_tempPrice);
@@ -326,9 +331,8 @@ void loadFiles()
             
         }
 
+        fclose(_fptr);
     }
-
-    fclose(_fptr);
 
    //READ DATA FROM CSV INTO _sales
 }
@@ -340,7 +344,7 @@ void saveFiles()
 
     if (_fptr == NULL)
     {
-        printf("Error creating new file \"stock.csv\"");
+        printf("\nError creating new file \"stock.csv\"\n");
     }
     else
     {
@@ -348,7 +352,7 @@ void saveFiles()
         {
             if (_car != NULL)
             {
-                fprintf(_fptr, "#%s,%s,%.2lf,%d\n", _car->getMake(), _car->getModel(), _car->getPrice(), _car->getStock());
+                fprintf(_fptr, "\n#%s,%s,%.2lf,%d", _car->getMake(), _car->getModel(), _car->getPrice(), _car->getStock());
             }
         }
 
