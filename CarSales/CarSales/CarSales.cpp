@@ -10,7 +10,7 @@ void buyCars();
 void adminMenu();
 void addStock();
 void removeStock();
-void viewSales();
+void viewAllSales();
 void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, char* _newModel, int _newAmount, double _newPrice, double _newOffer, bool _newFinal);
 void loadFiles();
 void saveFiles();
@@ -19,10 +19,10 @@ Date getDate();
 
 #define MAX_LEN 255
 
-SYSTEMTIME _sysDate;
+SYSTEMTIME _sysDate; //Used to fetch local/system time
 
 Car* _stock[10] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-Sale* _sales[]; //EITHER DECLARE SIZE OR CHANGE TO ARRAY OF SALE STRUCTS, NOT POINTERS
+Sale* _sales[MAX_LEN];
 
 FILE* _fptr;
 
@@ -140,8 +140,8 @@ void buyCars()
                 _currentSelection->setStock(_currentSelection->getStock() - _amount); //Remove amount desired from current stock
                 printf("\nAsking price: %.2lf\n", _currentSelection->getPrice());
                 _offer = readDouble("\nEnter the full asking price to complete purchase now, or make an offer\nYour offer (per car): ");
-                char* _name{};
-                char* _email{};
+                char _name[MAX_LEN];
+                char _email[MAX_LEN];
                 int _age;
 
                 if (_offer > _currentSelection->getPrice())
@@ -188,13 +188,17 @@ void adminMenu()
 
         while (!_quit)
         {
-            printf("Admin Menu:\n\n1.Add Stock\n2.Remove Stock\n3.View Sales History\n4.Main Menu\n\n");
+            printf("Admin Menu:\n\n1. Add Stock\n2. Remove Stock\n3. View Sales History\n4. Main Menu\n\n");
             
             int _selection = readIntInRange("Select an option from the menu: ",1,4);
 
             if (_selection == 1)
             {
                 addStock();   
+            }
+            if (_selection == 3)
+            {
+                viewAllSales();
             }
             else if (_selection == 4)
             {
@@ -210,22 +214,29 @@ void adminMenu()
 
 void addStock()
 {
-    char _make[MAX_LEN];
-    char _model[MAX_LEN];
-    readString("Enter car make: ", _make, MAX_LEN);
-    readString("Enter car model: ", _model, MAX_LEN);
-    double _price = readDouble("Enter price: ");
-    int _inStock = readInt("Enter number to add to stock: ");
+    if (_carIndex < 9)
+    {
+        char _make[MAX_LEN];
+        char _model[MAX_LEN];
+        readString("Enter car make: ", _make, MAX_LEN);
+        readString("Enter car model: ", _model, MAX_LEN);
+        double _price = readDouble("Enter price: ");
+        int _inStock = readInt("Enter number to add to stock: ");
 
-    Car* _newCar = new Car();
-    _newCar->setMake(_make);
-    _newCar->setModel(_model);
-    _newCar->setPrice(_price);
-    _newCar->setStock(_inStock);
+        Car* _newCar = new Car();
+        _newCar->setMake(_make);
+        _newCar->setModel(_model);
+        _newCar->setPrice(_price);
+        _newCar->setStock(_inStock);
 
-    _stock[_carIndex] = _newCar;
+        _stock[_carIndex] = _newCar;
 
-    _carIndex++;
+        _carIndex++;
+    }
+    else
+    {
+        printf("\nError: Too many different car models currently in stock.\n");
+    }
 }
 
 void removeStock()
@@ -233,24 +244,52 @@ void removeStock()
 
 }
 
-void viewSales()
+void viewAllSales()
 {
-    //FOR (Sale _sale : _sales) LOOP WON'T WORK WITH ARRAY OF UNDECLARED SIZE
+    
+    printf("\n\nSales History:\n\n");
+    bool _salePresent = false;
+
+    for (Sale* _sale : _sales)
+    {
+        if (_sale != NULL)
+        {
+            _salePresent = true;
+            i = 1;
+
+            printf("Date: %d/%d/%d", _sale->_dateOfSale._day, _sale->_dateOfSale._month, _sale->_dateOfSale._year);
+            printf("\nCustomer Name: %s\nCustomer email: %s\nCustomer Age: %d", _sale->_nameOfCust, _sale->_emailAddOfCust, _sale->_ageOfCust);
+            printf("\nCar Make & Model: %s %s\nQuantity Requested: %d\nAsking Price: %lf GBP\nCustomer's Offer: %lf GBP", _sale->_make, _sale->_model, _sale->_amount, _sale->_price, _sale->_offer);
+            printf("\nOffer finalised: ");
+            if (_sale->_final)
+            {
+                printf("Yes\n\n");
+            }
+            else
+            {
+                printf("No\n\n");
+            }
+        }
+    }
+
+    if (!_salePresent)
+    {
+        printf("There are no sales history records to display.\n\n");
+    }
 }
 
-void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, char* _newModel, int _newAmount, double _newPrice, double _newOffer, bool _newFinal) //Creates and adds a sale to _sales array
-{
-   //OG ATTEMPT
-    
+void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, char* _newModel, int _newAmount, double _newPrice, double _newOffer, bool _newFinal) //Creates and adds a sale record to _sales array
+{   
    Sale* _sale = new Sale;
 
     //Store customer info
-    _sale->_nameOfCust = _custName;
+    strcpy_s(_sale->_nameOfCust, _custName);
     _sale->_ageOfCust = _custAge;
-    _sale->_emailAddOfCust = _custEmail;
+    strcpy_s(_sale->_emailAddOfCust, _custEmail);
     //Store car info
     _sale->_make = _newMake;
     _sale->_model = _newModel;
+    _sale->_amount = _newAmount;
     _sale->_price = _newPrice;
     _sale->_offer = _newOffer;
     _sale->_final = _newFinal;
@@ -260,22 +299,6 @@ void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, ch
     _sales[_salesIndex] = _sale;
     _salesIndex++;
 
-
-    //NEW ATTEMPT
-
-    /*_sales[_salesIndex]->_nameOfCust = _custName;
-    _sales[_salesIndex]->_ageOfCust = _custAge;
-    _sales[_salesIndex]->_emailAddOfCust = _custEmail;
-    _sales[_salesIndex]->_make = _newMake;
-    _sales[_salesIndex]->_model = _newModel;
-    _sales[_salesIndex]->_amount = _newAmount;
-    _sales[_salesIndex]->_price = _newPrice;
-    _sales[_salesIndex]->_offer = _newOffer;
-    _sales[_salesIndex]->_final = _newFinal;
-
-    _sales[_salesIndex]->_dateOfSale = getDate();
-
-    _salesIndex++;*/
 }
 
 void loadFiles()
