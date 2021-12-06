@@ -1,3 +1,11 @@
+/*
+Function: Set of functions used to get user input from the keyboard
+Author: 2121058
+Version: 1
+Date: 
+*/
+
+
 #include <iostream>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -6,6 +14,11 @@
 
 const int MAX_LINE = 255;
 
+/// <summary>
+/// Used to get an integer value from keyboard input
+/// </summary>
+/// <param name="_prompt">Prompt message e.g "enter an integer: "</param>
+/// <returns></returns>
 int readInt(const char* _prompt)
 {
 	char _input[MAX_LINE]; //Char array of size 255

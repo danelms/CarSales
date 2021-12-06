@@ -1,18 +1,31 @@
+/*
+Function: 
+Author: 2121058
+Version: 1
+Date:
+*/
+
 #include <iostream>
 #define MAX_LEN 255
 
-struct Date //Struct used to store the date of a sale / offer
+/// <summary>
+/// Struct used to store the date (day, month, year)
+/// </summary>
+struct Date
 {
 	int _day;
 	int _month;
 	int _year;
 };
 
-struct Sale //Struct to store details of a sale (What car sold, for how much, when, and to whom)
+/// <summary>
+/// Struct used to store details of a sale (What car sold, for how much, when, and to whom)
+/// </summary>
+struct Sale 
 {
-	char _nameOfCust[MAX_LEN]; //Customer Name	
-	int _ageOfCust; //Customer Age
-	char _emailAddOfCust[MAX_LEN]; //Customer Email Address
+	char _nameOfCust[MAX_LEN]; 	
+	int _ageOfCust; 
+	char _emailAddOfCust[MAX_LEN]; 
 
 	char* _make; 
 	char* _model;
@@ -21,5 +34,5 @@ struct Sale //Struct to store details of a sale (What car sold, for how much, wh
 	double _offer;
 	Date _dateOfSale;
 
-	bool _final; //Bool to differentiate between pending and finalised sales
+	bool _final; 
 };

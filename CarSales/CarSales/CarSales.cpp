@@ -1,3 +1,10 @@
+/*
+Function:
+Author: 2121058
+Version: 1
+Date:
+*/
+
 #include <iostream>
 #include <cstring>
 #include <Windows.h>
@@ -11,6 +18,7 @@ void adminMenu();
 void addStock();
 void removeStock();
 void viewAllSales();
+void viewModelSales();
 void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, char* _newModel, int _newAmount, double _newPrice, double _newOffer, bool _newFinal);
 void loadFiles();
 void saveFiles();
@@ -39,6 +47,9 @@ int main()
     saveFiles();
 }
 
+/// <summary>
+/// Looping main menu, used to access all features of the program
+/// </summary>
 void mainMenu()
 {
     bool _quit = false;
@@ -70,6 +81,9 @@ void mainMenu()
     printf("\nThank you for visiting!\n");
 }
 
+/// <summary>
+/// Calls function to sort car by stock (desc. order) and then displays the results
+/// </summary>
 void viewCars()
 {
     BubbleSortDescStock(_stock);
@@ -127,9 +141,9 @@ void buyCars()
             int _amount = readInt("\nHow many would you like to purchase?: ");
             double _offer;
 
+                printf("\nERROR: Not that many currently in stock.\n");
             if (_amount > _currentSelection->getStock())
             {
-                printf("\nERROR: Not that many currently in stock.\n");
             }
             else if (_amount < 1)
             {
@@ -137,7 +151,7 @@ void buyCars()
             }
             else
             {
-                _currentSelection->setStock(_currentSelection->getStock() - _amount); //Remove amount desired from current stock
+                _currentSelection->setStock(_currentSelection->getStock() - _amount);
                 printf("\nAsking price: %.2lf\n", _currentSelection->getPrice());
                 _offer = readDouble("\nEnter the full asking price to complete purchase now, or make an offer\nYour offer (per car): ");
                 char _name[MAX_LEN];
@@ -188,19 +202,27 @@ void adminMenu()
 
         while (!_quit)
         {
-            printf("Admin Menu:\n\n1. Add Stock\n2. Remove Stock\n3. View Sales History\n4. Main Menu\n\n");
+            printf("Admin Menu:\n\n1. Add Stock\n2. Remove Stock\n3. View Sales History (All Sales)\n4. View Sales History by Model\n5. Quit\n\n");
             
-            int _selection = readIntInRange("Select an option from the menu: ",1,4);
+            int _selection = readIntInRange("Select an option from the menu: ",1,5);
 
             if (_selection == 1)
             {
                 addStock();   
             }
-            if (_selection == 3)
+            else if (_selection == 2)
+            {
+                removeStock();
+            }
+            else if (_selection == 3)
             {
                 viewAllSales();
             }
             else if (_selection == 4)
+            {
+                viewModelSales();
+            }
+            else if (_selection == 5)
             {
                 _quit = true;
             }
@@ -241,9 +263,37 @@ void addStock()
 
 void removeStock()
 {
+    viewCars();
+
+    Car* _currentSelection = NULL;
+    int _selection = readIntInRange("Which model's stock would you like to adjust?: ", 1, _carIndex + 1);
+
+    for (Car* _car : _stock)
+    {
+        if (NULL != _car && _selection == _car->getMenuPlace())
+        {
+            _currentSelection = _car;
+        }
+    }
+
+    if (NULL != _currentSelection)
+    {
+        int _removeAmnt = readIntInRange("How many would you like to remove from stock?", 1, _currentSelection->getStock());
+        
+        _currentSelection->setStock(_currentSelection->getStock() - _removeAmnt);
+        printf("\n%d x \"%s %s\" removed from stock\n", _removeAmnt, _currentSelection->getMake(), _currentSelection->getModel());
+    }
+
+    if (_currentSelection->getStock() == 0)
+    {
+        _stock[_currentSelection->getMenuPlace() - 1] = NULL;
+    }
 
 }
 
+/// <summary>
+/// 
+/// </summary>
 void viewAllSales()
 {
     
@@ -276,6 +326,11 @@ void viewAllSales()
     {
         printf("There are no sales history records to display.\n\n");
     }
+}
+
+void viewModelSales()
+{
+
 }
 
 void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, char* _newModel, int _newAmount, double _newPrice, double _newOffer, bool _newFinal) //Creates and adds a sale record to _sales array
