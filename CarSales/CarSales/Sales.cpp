@@ -27,8 +27,8 @@ struct Sale
 	int _ageOfCust; 
 	char _emailAddOfCust[MAX_LEN]; 
 
-	char* _make; 
-	char* _model;
+	char _make[MAX_LEN]; 
+	char _model[MAX_LEN];
 	int _amount;
 	double _price;
 	double _offer;

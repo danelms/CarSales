@@ -26,11 +26,12 @@ void BubbleSortDescStock(Car* _cars[]);
 Date getDate();
 
 #define MAX_LEN 255
+#define MAX_SALES 200
 
 SYSTEMTIME _sysDate; //Used to fetch local/system time
 
 Car* _stock[10] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-Sale* _sales[MAX_LEN];
+Sale* _sales[MAX_SALES];
 
 FILE* _fptr;
 
@@ -141,9 +142,10 @@ void buyCars()
             int _amount = readInt("\nHow many would you like to purchase?: ");
             double _offer;
 
-                printf("\nERROR: Not that many currently in stock.\n");
+                
             if (_amount > _currentSelection->getStock())
             {
+                printf("\nERROR: Not that many currently in stock.\n");
             }
             else if (_amount < 1)
             {
@@ -202,7 +204,7 @@ void adminMenu()
 
         while (!_quit)
         {
-            printf("Admin Menu:\n\n1. Add Stock\n2. Remove Stock\n3. View Sales History (All Sales)\n4. View Sales History by Model\n5. Quit\n\n");
+            printf("Admin Menu:\n\n1. Add Stock\n2. Remove Stock\n3. View Sales History (All Sales)\n4. View Sales History by Model\n5. Main Menu\n\n");
             
             int _selection = readIntInRange("Select an option from the menu: ",1,5);
 
@@ -266,7 +268,7 @@ void removeStock()
     viewCars();
 
     Car* _currentSelection = NULL;
-    int _selection = readIntInRange("Which model's stock would you like to adjust?: ", 1, _carIndex + 1);
+    int _selection = readIntInRange("\nWhich model's stock would you like to adjust?: ", 1, _carIndex + 1);
 
     for (Car* _car : _stock)
     {
@@ -278,7 +280,7 @@ void removeStock()
 
     if (NULL != _currentSelection)
     {
-        int _removeAmnt = readIntInRange("How many would you like to remove from stock?", 1, _currentSelection->getStock());
+        int _removeAmnt = readIntInRange("How many would you like to remove from stock?: ", 1, _currentSelection->getStock());
         
         _currentSelection->setStock(_currentSelection->getStock() - _removeAmnt);
         printf("\n%d x \"%s %s\" removed from stock\n", _removeAmnt, _currentSelection->getMake(), _currentSelection->getModel());
@@ -309,7 +311,7 @@ void viewAllSales()
 
             printf("Date: %d/%d/%d", _sale->_dateOfSale._day, _sale->_dateOfSale._month, _sale->_dateOfSale._year);
             printf("\nCustomer Name: %s\nCustomer email: %s\nCustomer Age: %d", _sale->_nameOfCust, _sale->_emailAddOfCust, _sale->_ageOfCust);
-            printf("\nCar Make & Model: %s %s\nQuantity Requested: %d\nAsking Price: %lf GBP\nCustomer's Offer: %lf GBP", _sale->_make, _sale->_model, _sale->_amount, _sale->_price, _sale->_offer);
+            printf("\nCar Make & Model: %s %s\nQuantity Requested: %d\nAsking Price: %.2lf GBP\nCustomer's Offer: %.2lf GBP", _sale->_make, _sale->_model, _sale->_amount, _sale->_price, _sale->_offer);
             printf("\nOffer finalised: ");
             if (_sale->_final)
             {
@@ -342,8 +344,8 @@ void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, ch
     _sale->_ageOfCust = _custAge;
     strcpy_s(_sale->_emailAddOfCust, _custEmail);
     //Store car info
-    _sale->_make = _newMake;
-    _sale->_model = _newModel;
+    strcpy_s(_sale->_make, _newMake);
+    strcpy_s(_sale->_model, _newModel);
     _sale->_amount = _newAmount;
     _sale->_price = _newPrice;
     _sale->_offer = _newOffer;
@@ -358,7 +360,7 @@ void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, ch
 
 void loadFiles()
 {
-   //READ DATA FROM CSV INTO _stock
+   
     char _buffer[MAX_LEN];
     char _tempMake[MAX_LEN];
     char _tempModel[MAX_LEN];
@@ -397,13 +399,12 @@ void loadFiles()
                 _start = _end + 1;
                 sscanf_s(_start, "%lf,%d\n", &_tempPrice, &_tempStock); //Remaining two values assigned to _tempPrice & _tempStock
 
-                _stock[i] = new Car;                    //Create new car object using data from CSV line
-                _stock[i]->setMake(_tempMake);
-                _stock[i]->setModel(_tempModel);
-                _stock[i]->setPrice(_tempPrice);
-                _stock[i]->setStock(_tempStock);
+                _stock[_carIndex] = new Car;                    //Create new car object using data from CSV line
+                _stock[_carIndex]->setMake(_tempMake);
+                _stock[_carIndex]->setModel(_tempModel);
+                _stock[_carIndex]->setPrice(_tempPrice);
+                _stock[_carIndex]->setStock(_tempStock);
 
-                i++;
                 _carIndex++;
             }
             
@@ -412,7 +413,71 @@ void loadFiles()
         fclose(_fptr);
     }
 
-   //READ DATA FROM CSV INTO _sales
+    fopen_s(&_fptr, "sales.csv", "r");
+
+    if (NULL == _fptr)
+    {
+        printf("\nAttention! No current file containing sales information found, one will be created upon exit of program.\n");
+    }
+    else
+    {
+        char* _start;
+        char* _end;
+        i = 0;
+        int _tempBool;
+
+        while (!feof(_fptr))
+        {
+            fgets(_buffer, MAX_LEN, _fptr);
+
+            if (_buffer[0] == '#')
+            {
+                Sale* _sale = new Sale;
+
+                printf("\nBUFFER: %s\n", _buffer);//TRBLSHTR!!!!!!!!!!!!!!!!!!!!
+                _start = _buffer + 1;                                   
+                _end = strchr(_buffer, ',');                        
+                strncpy_s(_sale->_nameOfCust, _start, int(_end - _start));     
+                _start = _end + 1;
+                _end += 1;
+                while (*_end != ',')                              
+                {
+                    _end++;
+                }
+                strncpy_s(_sale->_emailAddOfCust, _start, int(_end - _start));
+                _start = _end + 1;
+                _end += 1;
+                while (*_end != ',')
+                {
+                    _end++;
+                }
+                strncpy_s(_sale->_make, _start, int(_end - _start));
+                _start = _end + 1;
+                _end += 1;
+                while (*_end != ',')
+                {
+                    _end++;
+                }
+                strncpy_s(_sale->_model, _start, int(_end - _start));
+                _start = _end + 1;
+                sscanf_s(_start, "%d,%d,%lf,%lf,%d,%d,%d,%d\n", &_sale->_ageOfCust, &_sale->_amount, &_sale->_price, &_sale->_offer, &_sale->_dateOfSale._day, &_sale->_dateOfSale._month, &_sale->_dateOfSale._year, &_tempBool);
+
+                if (_tempBool == 0)
+                {
+                    _sale->_final = false;
+                }
+                else
+                {
+                    _sale->_final = true;
+                }
+
+                _sales[_salesIndex] = _sale;
+                _salesIndex++;
+            }
+        }
+
+        fclose(_fptr);
+    }
 }
 
 void saveFiles()
@@ -420,7 +485,7 @@ void saveFiles()
     //WRITE DATA FROM _stock INTO CSV
     _fptr = fopen("stock.csv", "w"); //Open "stock.csv" in write (Create new file / overwrite file)
 
-    if (_fptr == NULL)
+    if (NULL == _fptr)
     {
         printf("\nError creating new file \"stock.csv\"\n");
     }
@@ -438,6 +503,35 @@ void saveFiles()
     }
     
     //WRITE DATA FROM _sales INTO CSV
+    _fptr = fopen("sales.csv", "w");
+
+    if (NULL == _fptr)
+    {
+        printf("\nError creating new file \"sales.csv\"\n");
+    }
+    else
+    {
+        int _boolValue;
+
+        for (Sale* _sale : _sales)
+        {  
+            if (_sale != NULL)
+            {
+                if (_sale->_final)
+                {
+                    _boolValue = 1;
+                }
+                else
+                {
+                    _boolValue = 0;
+                }
+
+                fprintf(_fptr, "\n#%s,%s,%s,%s,%d,%d,%lf,%lf,%d,%d,%d,%d", _sale->_nameOfCust, _sale->_emailAddOfCust, _sale->_make, _sale->_model, _sale->_ageOfCust, _sale->_amount, _sale->_price, _sale->_offer, _sale->_dateOfSale._day, _sale->_dateOfSale._month, _sale->_dateOfSale._year, _boolValue);
+            }
+        }
+
+        fclose(_fptr);
+    }
 }
 
 void BubbleSortDescStock(Car* _cars[])
@@ -471,7 +565,7 @@ void BubbleSortDescStock(Car* _cars[])
     }
 }
 
-Date getDate() //Creates and returns a Date struct containing today's date
+Date getDate()
 {
     Date* _date = new Date;
     _date->_day = _sysDate.wDay;
