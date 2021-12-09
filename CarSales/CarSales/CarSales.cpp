@@ -18,7 +18,7 @@ void adminMenu();
 void addStock();
 void removeStock();
 void viewAllSales();
-void viewModelSales();
+void viewFinalSales();
 void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, char* _newModel, int _newAmount, double _newPrice, double _newOffer, bool _newFinal);
 void loadFiles();
 void saveFiles();
@@ -204,7 +204,7 @@ void adminMenu()
 
         while (!_quit)
         {
-            printf("Admin Menu:\n\n1. Add Stock\n2. Remove Stock\n3. View Sales History (All Sales)\n4. View Sales History by Model\n5. Main Menu\n\n");
+            printf("\nAdmin Menu:\n\n1. Add Stock\n2. Remove Stock\n3. View Sales History (All Sales)\n4. View Finalised Sales History by Model\n5. Main Menu\n\n");
             
             int _selection = readIntInRange("Select an option from the menu: ",1,5);
 
@@ -222,7 +222,7 @@ void adminMenu()
             }
             else if (_selection == 4)
             {
-                viewModelSales();
+                viewFinalSales();
             }
             else if (_selection == 5)
             {
@@ -330,9 +330,65 @@ void viewAllSales()
     }
 }
 
-void viewModelSales()
+void viewFinalSales()
 {
+    int _amount[MAX_SALES] = {0};
+    int _pos;
+    double _total[MAX_SALES] = {0.0};
+    char* _models[MAX_SALES] = {NULL};
+    i = 0;
+    bool _inList;
 
+    for (Sale* _sale : _sales)
+    {
+        if (_sale != NULL)
+        {
+            _inList = false;
+
+            for (char* _m : _models)
+            {
+                if (_m != NULL)
+                {
+                    if ((strcmp(_m, _sale->_model)) == 1 && _sale->_final)
+                    {
+                        _inList = true;
+                        _pos = i;
+                    }
+                }
+                if (_m == NULL && _sale->_final)
+                {
+                    _pos = i;
+                    i++;
+                    break;
+                }
+
+                i++;
+            }
+
+            if (_inList)
+            {
+                _amount[_pos] += _sale->_amount;
+                _total[_pos] += _sale->_offer * _sale->_amount;
+            }
+            else if (_sale->_final)
+            {
+                strcpy(_models[_pos], _sale->_model); //FJHNASKDJHASURHFAEE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                _amount[_pos] = _sale->_amount;
+                _total[_pos] = _sale->_offer * _sale->_amount;
+            }
+        }
+    }
+
+    i = 0;
+
+    for (char* _m : _models)
+    {
+        if (_amount[i] != 0)
+        {
+            printf("\n%d. %s sales: %d, for a total of %.2lf GBP\n", i + 1, _m, _amount[i], _total[i]);
+            i++;
+        }
+    }
 }
 
 void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, char* _newModel, int _newAmount, double _newPrice, double _newOffer, bool _newFinal) //Creates and adds a sale record to _sales array
