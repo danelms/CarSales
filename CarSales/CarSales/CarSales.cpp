@@ -196,7 +196,7 @@ void buyCars()
 void adminMenu()
 {
     char _password[MAX_LEN];
-    readString("!Authorised access only!\n\nEnter the administrator password to access this menu: ", _password, MAX_LEN);
+    readString("\n!Authorised access only!\n\nEnter the administrator password to access this menu: ", _password, MAX_LEN);
 
     if (strcmp(_password, _adminPassword) == 0)
     {
@@ -333,37 +333,45 @@ void viewAllSales()
 void viewFinalSales()
 {
     int _amount[MAX_SALES] = {0};
-    int _pos;
+    int _pos = 0;
     double _total[MAX_SALES] = {0.0};
+    char _model[MAX_LEN] = {NULL};
     char* _models[MAX_SALES] = {NULL};
     i = 0;
-    bool _inList;
+    bool _inList = false;
 
     for (Sale* _sale : _sales)
     {
         if (_sale != NULL)
         {
-            _inList = false;
 
             for (char* _m : _models)
             {
+                _inList = false;
+
                 if (_m != NULL)
                 {
-                    if ((strcmp(_m, _sale->_model)) == 1 && _sale->_final)
+                    if ((strcmp(_m, _sale->_model)) == 0 && _sale->_final)
                     {
                         _inList = true;
                         _pos = i;
+                        break;
                     }
                 }
-                if (_m == NULL && _sale->_final)
+                else if (_m == NULL && _sale->_final)
                 {
                     _pos = i;
-                    i++;
+                    break;
+                }
+                else
+                {
                     break;
                 }
 
                 i++;
             }
+
+            i = 0;
 
             if (_inList)
             {
@@ -372,22 +380,39 @@ void viewFinalSales()
             }
             else if (_sale->_final)
             {
-                strcpy(_models[_pos], _sale->_model); //FJHNASKDJHASURHFAEE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                char* _newModel = new char[MAX_LEN];
+                strcpy(_newModel, _sale->_model);
+                _models[_pos] = _newModel;
                 _amount[_pos] = _sale->_amount;
                 _total[_pos] = _sale->_offer * _sale->_amount;
             }
         }
+        else
+        {
+            break;
+        }
     }
 
-    i = 0;
+    bool _salePresent = false;
 
-    for (char* _m : _models)
+    //BUBBLESORTFINALSALESDESC ------------------------------------------------------------------------------
+
+    for (i = 0; i < MAX_SALES; i++)
     {
         if (_amount[i] != 0)
         {
-            printf("\n%d. %s sales: %d, for a total of %.2lf GBP\n", i + 1, _m, _amount[i], _total[i]);
-            i++;
+            _salePresent = true;
+            printf("\n%d. %s sales: %d, for a total of %.2lf GBP\n", i + 1, _models[i], _amount[i], _total[i]);
         }
+        else
+        {
+            break;
+        }
+    }
+
+    if (!_salePresent)
+    {
+        printf("\nNo finalised sales to display\n");
     }
 }
 
