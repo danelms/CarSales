@@ -107,6 +107,9 @@ void viewCars()
     }
 }
 
+/// <summary>
+/// Displays cars in stock, enables user to select a model to purchase, subsequently creates a sales struct to record the details
+/// </summary>
 void buyCars()
 {
     viewCars();
@@ -193,6 +196,9 @@ void buyCars()
     
 }
 
+/// <summary>
+/// If the correct password is entered, displays the administrator's menu with specific functions, otherwise prints error and returns to main menu
+/// </summary>
 void adminMenu()
 {
     char _password[MAX_LEN];
@@ -236,6 +242,9 @@ void adminMenu()
     }
 }
 
+/// <summary>
+/// Used to add more stock, up to maximum of 10 models
+/// </summary>
 void addStock()
 {
     if (_carIndex < 9)
@@ -263,6 +272,9 @@ void addStock()
     }
 }
 
+/// <summary>
+/// Used to manually remove stock, if all stock is depleted, the array index it occupied becomes NULL
+/// </summary>
 void removeStock()
 {
     viewCars();
@@ -294,7 +306,7 @@ void removeStock()
 }
 
 /// <summary>
-/// 
+/// Displays details for every single sale
 /// </summary>
 void viewAllSales()
 {
@@ -330,6 +342,9 @@ void viewAllSales()
     }
 }
 
+/// <summary>
+/// Displays summary of finalised sales per model, in descending order of value
+/// </summary>
 void viewFinalSales()
 {
     int _amount[MAX_SALES] = {0};
@@ -416,6 +431,18 @@ void viewFinalSales()
     }
 }
 
+/// <summary>
+/// Creates sales struct
+/// </summary>
+/// <param name="_custName">Name of customer</param>
+/// <param name="_custAge">Age of customer</param>
+/// <param name="_custEmail">Email address of customer</param>
+/// <param name="_newMake">Car make</param>
+/// <param name="_newModel">Car model</param>
+/// <param name="_newAmount">Quantity of car requested</param>
+/// <param name="_newPrice">Asking price</param>
+/// <param name="_newOffer">Customer's offer</param>
+/// <param name="_newFinal">Bool that represent whether or not the offer has been accepted</param>
 void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, char* _newModel, int _newAmount, double _newPrice, double _newOffer, bool _newFinal) //Creates and adds a sale record to _sales array
 {   
    Sale* _sale = new Sale;
@@ -439,6 +466,9 @@ void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, ch
 
 }
 
+/// <summary>
+/// Uses CSV files (if present) to add previously saved data to _stock and _sales arrays
+/// </summary>
 void loadFiles()
 {
    
@@ -561,6 +591,9 @@ void loadFiles()
     }
 }
 
+/// <summary>
+/// Writes data from _stock and _sales arrays to CSV file
+/// </summary>
 void saveFiles()
 {
     //WRITE DATA FROM _stock INTO CSV
@@ -615,6 +648,10 @@ void saveFiles()
     }
 }
 
+/// <summary>
+/// Sorts an array of car painters by remaining stock (descending)
+/// </summary>
+/// <param name="_cars">Car pointer array to be sorted</param>
 void BubbleSortDescStock(Car* _cars[])
 {
     bool _swapped = true;
@@ -646,6 +683,7 @@ void BubbleSortDescStock(Car* _cars[])
     }
 }
 
+/// <returns>Today's date as Date struct</returns>
 Date getDate()
 {
     Date* _date = new Date;
