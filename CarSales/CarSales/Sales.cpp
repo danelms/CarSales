@@ -1,5 +1,5 @@
 /*
-Function: 
+Function: Struct used to stores details of a sale
 Author: 2121058
 Version: 1
 Date:

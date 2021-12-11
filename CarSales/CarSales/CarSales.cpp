@@ -1,5 +1,5 @@
 /*
-Function:
+Function: Program to allow purchase/sale of cars
 Author: 2121058
 Version: 1
 Date:
@@ -19,16 +19,18 @@ void addStock();
 void removeStock();
 void viewAllSales();
 void viewFinalSales();
+void clearSales();
 void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, char* _newModel, int _newAmount, double _newPrice, double _newOffer, bool _newFinal);
 void loadFiles();
 void saveFiles();
-void BubbleSortDescStock(Car* _cars[]);
+void bubbleSortDescStock(Car* _cars[]);
+void bubbleSortDescFinalSale(int _amount[], double _total[], char* _models[]);
 Date getDate();
 
 #define MAX_LEN 255
 #define MAX_SALES 200
 
-SYSTEMTIME _sysDate; //Used to fetch local/system time
+SYSTEMTIME _sysDate;
 
 Car* _stock[10] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 Sale* _sales[MAX_SALES];
@@ -40,9 +42,7 @@ int i, _carIndex = 0, _salesIndex = 0;
 
 int main()
 {
-    GetLocalTime(&_sysDate); //Fetch current local time for use in Date struct
-    printf("\nToday's date: %02d/%02d/%04d\n", _sysDate.wDay, _sysDate.wMonth, _sysDate.wYear); //Just for testing DELETE
-
+    GetLocalTime(&_sysDate);
     loadFiles();
     mainMenu();
     saveFiles();
@@ -87,7 +87,7 @@ void mainMenu()
 /// </summary>
 void viewCars()
 {
-    BubbleSortDescStock(_stock);
+    bubbleSortDescStock(_stock);
 
     printf("\n");
     bool _inStock = false;
@@ -112,86 +112,93 @@ void viewCars()
 /// </summary>
 void buyCars()
 {
-    viewCars();
-    printf("%d. Return to Main Menu\n\n", _carIndex + 1);
-
-    int _selection = readIntInRange("Select the car you would like to purchase: ",1,_carIndex + 1);
-    bool _quit = false, _currentSet = false;
-    Car* _currentSelection = NULL;
-
-    while (!_quit)
+    if (_salesIndex < MAX_SALES)
     {
-        if (_selection == _carIndex + 1)
-        {
-            _quit = true;
-        }
-        else
-        {
-            for (Car* _car : _stock)
-            {
-                if (NULL != _car &&_selection == _car->getMenuPlace())
-                {
-                    _currentSelection = _car;
-                    _currentSet = true;
-                }
-            }
+        viewCars();
+        printf("%d. Return to Main Menu\n\n", _carIndex + 1);
 
-            if (!_currentSet)
+        int _selection = readIntInRange("Select the car you would like to purchase: ", 1, _carIndex + 1);
+        bool _quit = false, _currentSet = false;
+        Car* _currentSelection = NULL;
+
+        while (!_quit)
+        {
+            if (_selection == _carIndex + 1)
             {
-                printf("\n!Unforseen Error, returning to main menu!\n");
                 _quit = true;
-            }
-
-            int _amount = readInt("\nHow many would you like to purchase?: ");
-            double _offer;
-
-                
-            if (_amount > _currentSelection->getStock())
-            {
-                printf("\nERROR: Not that many currently in stock.\n");
-            }
-            else if (_amount < 1)
-            {
-                printf("\nERROR: You cannot purchase less than 1 car.\n");
             }
             else
             {
-                _currentSelection->setStock(_currentSelection->getStock() - _amount);
-                printf("\nAsking price: %.2lf\n", _currentSelection->getPrice());
-                _offer = readDouble("\nEnter the full asking price to complete purchase now, or make an offer\nYour offer (per car): ");
-                char _name[MAX_LEN];
-                char _email[MAX_LEN];
-                int _age;
-
-                if (_offer > _currentSelection->getPrice())
+                for (Car* _car : _stock)
                 {
-                    printf("\nError: Sorry, we cannot accept offers over the asking price\nPlease enter the full asking price or make an offer\n");
-                }
-                else if (_offer < _currentSelection->getPrice())
-                {
-                    printf("\nPlease provide some details so we can get in touch and improve analytics\nPlease ensure these details are correct\n");
-                    readString("Your name: ", _name, MAX_LEN);
-                    readString("Your email address: ", _email, MAX_LEN);
-                    _age = readIntInRange("Your age: ", 1, 130);
-
-                    addSale(_name, _age, _email, _currentSelection->getMake(), _currentSelection->getModel(), _amount, _currentSelection->getPrice(), _offer, false);
-                    printf("\nThank you!\nYour offer has been recorded and is pending confirmation\nWe will contact you by email shortly\n");
-                }
-                else if (_offer == _currentSelection->getPrice())
-                {
-                    printf("\nPlease provide some details so we can get in touch and improve analytics\nPlease ensure these details are correct\n");
-                    readString("Your name: ", _name, MAX_LEN);
-                    readString("Your email address: ", _email, MAX_LEN);
-                    _age = readIntInRange("Your age: ", 1, 130);
-
-                    addSale(_name, _age, _email, _currentSelection->getMake(), _currentSelection->getModel(), _amount, _currentSelection->getPrice(), _offer, true);
-                    printf("\nThank you! Your offer has been accepted\nWe will contact you by email shortly\n");
+                    if (NULL != _car && _selection == _car->getMenuPlace())
+                    {
+                        _currentSelection = _car;
+                        _currentSet = true;
+                    }
                 }
 
-                _quit = true;
+                if (!_currentSet)
+                {
+                    printf("\n!Unforeseen Error, returning to main menu!\n");
+                    _quit = true;
+                }
+
+                int _amount = readInt("\nHow many would you like to purchase?: ");
+                double _offer;
+
+
+                if (_amount > _currentSelection->getStock())
+                {
+                    printf("\nERROR: Not that many currently in stock.\n");
+                }
+                else if (_amount < 1)
+                {
+                    printf("\nERROR: You cannot purchase less than 1 car.\n");
+                }
+                else
+                {
+                    _currentSelection->setStock(_currentSelection->getStock() - _amount);
+                    printf("\nAsking price: %.2lf\n", _currentSelection->getPrice());
+                    _offer = readDouble("\nEnter the full asking price to complete purchase now, or make an offer\nYour offer (per car): ");
+                    char _name[MAX_LEN];
+                    char _email[MAX_LEN];
+                    int _age;
+
+                    if (_offer > _currentSelection->getPrice())
+                    {
+                        printf("\nError: Sorry, we cannot accept offers over the asking price\nPlease enter the full asking price or make an offer\n");
+                    }
+                    else if (_offer < _currentSelection->getPrice())
+                    {
+                        printf("\nPlease provide some details so we can get in touch and improve analytics\nPlease ensure these details are correct\n");
+                        readString("Your name: ", _name, MAX_LEN);
+                        readString("Your email address: ", _email, MAX_LEN);
+                        _age = readIntInRange("Your age: ", 1, 130);
+
+                        addSale(_name, _age, _email, _currentSelection->getMake(), _currentSelection->getModel(), _amount, _currentSelection->getPrice(), _offer, false);
+                        printf("\nThank you!\nYour offer has been recorded and is pending confirmation\nWe will contact you by email shortly\n");
+                    }
+                    else if (_offer == _currentSelection->getPrice())
+                    {
+                        printf("\nPlease provide some details so we can get in touch and improve analytics\nPlease ensure these details are correct\n");
+                        readString("Your name: ", _name, MAX_LEN);
+                        readString("Your email address: ", _email, MAX_LEN);
+                        _age = readIntInRange("Your age: ", 1, 130);
+
+                        addSale(_name, _age, _email, _currentSelection->getMake(), _currentSelection->getModel(), _amount, _currentSelection->getPrice(), _offer, true);
+                        printf("\nThank you! Your offer has been accepted\nWe will contact you by email shortly\n");
+                    }
+
+                    _quit = true;
+                }
             }
+
         }
-        
+    }
+    else
+    {
+        printf("\nSorry, the sales history is full. Purchasing will be available again soon.\n");
     }
     
 }
@@ -210,9 +217,9 @@ void adminMenu()
 
         while (!_quit)
         {
-            printf("\nAdmin Menu:\n\n1. Add Stock\n2. Remove Stock\n3. View Sales History (All Sales)\n4. View Finalised Sales History by Model\n5. Main Menu\n\n");
+            printf("\nAdmin Menu:\n\n1. Add Stock\n2. Remove Stock\n3. View Sales History (All Sales)\n4. View Finalised Sales History by Model\n5. Delete Sales History\n6. Main Menu\n\n");
             
-            int _selection = readIntInRange("Select an option from the menu: ",1,5);
+            int _selection = readIntInRange("Select an option from the menu: ",1,6);
 
             if (_selection == 1)
             {
@@ -232,6 +239,10 @@ void adminMenu()
             }
             else if (_selection == 5)
             {
+                clearSales();
+            }
+            else if (_selection == 6)
+            {
                 _quit = true;
             }
         }
@@ -247,7 +258,7 @@ void adminMenu()
 /// </summary>
 void addStock()
 {
-    if (_carIndex < 9)
+    if (_carIndex < 10)
     {
         char _make[MAX_LEN];
         char _model[MAX_LEN];
@@ -292,15 +303,23 @@ void removeStock()
 
     if (NULL != _currentSelection)
     {
-        int _removeAmnt = readIntInRange("How many would you like to remove from stock?: ", 1, _currentSelection->getStock());
-        
-        _currentSelection->setStock(_currentSelection->getStock() - _removeAmnt);
-        printf("\n%d x \"%s %s\" removed from stock\n", _removeAmnt, _currentSelection->getMake(), _currentSelection->getModel());
+        if (_currentSelection->getStock() > 0)
+        {
+            int _removeAmnt = readIntInRange("How many would you like to remove from stock?: ", 1, _currentSelection->getStock());
+
+            _currentSelection->setStock(_currentSelection->getStock() - _removeAmnt);
+            printf("\n%d x \"%s %s\" removed from stock\n", _removeAmnt, _currentSelection->getMake(), _currentSelection->getModel());
+        }
+        else
+        {
+            printf("\n%s %s removed from stock list.\n", _currentSelection->getMake(), _currentSelection->getModel());
+        }
     }
 
     if (_currentSelection->getStock() == 0)
     {
         _stock[_currentSelection->getMenuPlace() - 1] = NULL;
+        _carIndex --;
     }
 
 }
@@ -350,7 +369,6 @@ void viewFinalSales()
     int _amount[MAX_SALES] = {0};
     int _pos = 0;
     double _total[MAX_SALES] = {0.0};
-    char _model[MAX_LEN] = {NULL};
     char* _models[MAX_SALES] = {NULL};
     i = 0;
     bool _inList = false;
@@ -410,7 +428,7 @@ void viewFinalSales()
 
     bool _salePresent = false;
 
-    //BUBBLESORTFINALSALESDESC ------------------------------------------------------------------------------
+    bubbleSortDescFinalSale(_amount, _total, _models);
 
     for (i = 0; i < MAX_SALES; i++)
     {
@@ -432,7 +450,57 @@ void viewFinalSales()
 }
 
 /// <summary>
-/// Creates sales struct
+/// Sets all Sales in _sales to NULL (effectively 'deleting' them)
+/// </summary>
+void clearSales()
+{
+    bool _abort;
+    printf("\nWarning, once cleared the sales data cannot be recovered.\nPlease ensure that all sales have been recorded elsewhere before proceeding.\n\n");
+
+    char _selection = readChar("Would you like to view sales before deletion? (Y/N, or any other input to abort): ");
+    {
+        if (_selection == 'y' || _selection == 'Y')
+        {
+            viewAllSales();
+            _abort = false;
+        }
+        else if (_selection == 'n' || _selection == 'N')
+        {
+            _abort = false;
+        }
+        else 
+        {
+            printf("\nInput \"%c\" unrecognised, deletion aborted.\n", _selection);
+            _abort = true;
+        }
+
+        if (!_abort)
+        {
+            i = 0;
+
+            for (Sale* _sale : _sales)
+            {
+                if (_sale != NULL)
+                {
+                    _sales[i] = NULL;
+                }
+                else
+                {
+                    break;
+                }
+
+                i++;
+            }
+
+            _salesIndex = 0;
+            printf("\nSales records deleted\n");
+        }
+
+    }
+}
+
+/// <summary>
+/// Creates sales struct, adds it to _sales
 /// </summary>
 /// <param name="_custName">Name of customer</param>
 /// <param name="_custAge">Age of customer</param>
@@ -447,18 +515,15 @@ void addSale(char* _custName, int _custAge, char* _custEmail, char* _newMake, ch
 {   
    Sale* _sale = new Sale;
 
-    //Store customer info
     strcpy_s(_sale->_nameOfCust, _custName);
     _sale->_ageOfCust = _custAge;
     strcpy_s(_sale->_emailAddOfCust, _custEmail);
-    //Store car info
     strcpy_s(_sale->_make, _newMake);
     strcpy_s(_sale->_model, _newModel);
     _sale->_amount = _newAmount;
     _sale->_price = _newPrice;
     _sale->_offer = _newOffer;
     _sale->_final = _newFinal;
-    //Store date
     _sale->_dateOfSale = getDate();
     
     _sales[_salesIndex] = _sale;
@@ -494,23 +559,22 @@ void loadFiles()
         {
             fgets(_buffer, MAX_LEN, _fptr);
             
-            if (_buffer[0] == '#')      //if line starts with a '#' (has been written to)
+            if (_buffer[0] == '#')      
             {
-                printf("\nBUFFER: %s\n", _buffer);//TROUBLESHOOTER - REMEMBER TO REMOVE !!!!!!!!
-                _start = _buffer + 1;                                   //Point to start of _buffer
-                _end = strchr(_buffer, ',');                        //Point to first comma in _buffer (end of car make)
-                strncpy_s(_tempMake, _start, int(_end - _start));     //_tempMake is assigned the string comprised of everything up until _end (first comma)
+                _start = _buffer + 1;                                  
+                _end = strchr(_buffer, ',');                        
+                strncpy_s(_tempMake, _start, int(_end - _start));     
                 _start = _end + 1;
                 _end += 1;
-                while (*_end != ',')                              //Iterate until next comma
+                while (*_end != ',')                              
                 {
                     _end++;
                 }
-                strncpy_s(_tempModel, _start, int(_end - _start));    //tempModel is assigned the string comprised of everything from _start to _end (1st letter of model to next comma)
+                strncpy_s(_tempModel, _start, int(_end - _start));    
                 _start = _end + 1;
-                sscanf_s(_start, "%lf,%d\n", &_tempPrice, &_tempStock); //Remaining two values assigned to _tempPrice & _tempStock
+                sscanf_s(_start, "%lf,%d\n", &_tempPrice, &_tempStock); 
 
-                _stock[_carIndex] = new Car;                    //Create new car object using data from CSV line
+                _stock[_carIndex] = new Car;                   
                 _stock[_carIndex]->setMake(_tempMake);
                 _stock[_carIndex]->setModel(_tempModel);
                 _stock[_carIndex]->setPrice(_tempPrice);
@@ -545,7 +609,6 @@ void loadFiles()
             {
                 Sale* _sale = new Sale;
 
-                printf("\nBUFFER: %s\n", _buffer);//TRBLSHTR!!!!!!!!!!!!!!!!!!!!
                 _start = _buffer + 1;                                   
                 _end = strchr(_buffer, ',');                        
                 strncpy_s(_sale->_nameOfCust, _start, int(_end - _start));     
@@ -596,8 +659,7 @@ void loadFiles()
 /// </summary>
 void saveFiles()
 {
-    //WRITE DATA FROM _stock INTO CSV
-    _fptr = fopen("stock.csv", "w"); //Open "stock.csv" in write (Create new file / overwrite file)
+    _fptr = fopen("stock.csv", "w");
 
     if (NULL == _fptr)
     {
@@ -616,7 +678,6 @@ void saveFiles()
         fclose(_fptr);
     }
     
-    //WRITE DATA FROM _sales INTO CSV
     _fptr = fopen("sales.csv", "w");
 
     if (NULL == _fptr)
@@ -652,7 +713,7 @@ void saveFiles()
 /// Sorts an array of car painters by remaining stock (descending)
 /// </summary>
 /// <param name="_cars">Car pointer array to be sorted</param>
-void BubbleSortDescStock(Car* _cars[])
+void bubbleSortDescStock(Car* _cars[])
 {
     bool _swapped = true;
     Car* _carTemp;
@@ -678,6 +739,52 @@ void BubbleSortDescStock(Car* _cars[])
             if (_cars[i] != NULL)
             {
                 _cars[i]->setMenuPlace(i + 1);
+            }
+        }
+    }
+}
+
+/// <summary>
+/// Used within viewFinalSales() to sort multiple arrays concerning sales data before display
+/// </summary>
+/// <param name="_amount">Array containing sales quantities</param>
+/// <param name="_total">Array containing sales totals (money)</param>
+/// <param name="_models">Array containing pointers to model names</param>
+void bubbleSortDescFinalSale(int _amount[], double _total[], char* _models[])
+{
+    bool _swapped = true;
+    int _amountTemp;
+    double _totalTemp;
+    char* _modelTemp;
+
+    while (_swapped)
+    {
+        _swapped = false;
+
+        for (i = 0; i < MAX_SALES; i++)
+        {
+            if (_amount[i] != 0 && _amount[i + 1] != 0)
+            {
+                if (_total[i] < _total[i + 1])
+                {
+                    _amountTemp = _amount[i];
+                    _amount[i] = _amount[i + 1];
+                    _amount[i + 1] = _amountTemp;
+
+                    _totalTemp = _total[i];
+                    _total[i] = _total[i + 1];
+                    _total[i + 1] = _totalTemp;
+
+                    _modelTemp = _models[i];
+                    _models[i] = _models[i + 1];
+                    _models[i + 1] = _modelTemp;
+
+                    _swapped = true;
+                }
+            }
+            else
+            {
+                break;
             }
         }
     }
