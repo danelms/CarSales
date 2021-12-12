@@ -2,7 +2,7 @@
 Function: Class used to instantiate/edit Car objects
 Author: 2121058
 Version: 1
-Date:
+Date: 12/12/21
 */
 
 #include <iostream>

@@ -2,7 +2,7 @@
 Function: Program to allow purchase/sale of cars
 Author: 2121058
 Version: 1
-Date:
+Date: 12/12/21
 */
 
 #include <iostream>
@@ -159,7 +159,7 @@ void buyCars()
                 else
                 {
                     _currentSelection->setStock(_currentSelection->getStock() - _amount);
-                    printf("\nAsking price: %.2lf\n", _currentSelection->getPrice());
+                    printf("\nAsking price: %.2lf GBP\n", _currentSelection->getPrice());
                     _offer = readDouble("\nEnter the full asking price to complete purchase now, or make an offer\nYour offer (per car): ");
                     char _name[MAX_LEN];
                     char _email[MAX_LEN];
